@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
 public class Post {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
@@ -51,6 +51,13 @@ public class Post {
     }
 
     public Post() {
+    }
+
+    public Post(Long id, String title, String content) {
+        super();
+        this.id = id;
+        this.title = title;
+        this.content = content;
     }
 
     public Long getId() {

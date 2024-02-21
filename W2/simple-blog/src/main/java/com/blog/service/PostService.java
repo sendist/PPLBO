@@ -10,6 +10,8 @@ import com.blog.repository.PostRepository;
 import com.blog.repository.PostJpaRepository;
 import com.blog.vo.Post;
 
+import io.micrometer.common.util.StringUtils;
+
 @Service
 public class PostService {
     private static List<Post> posts;
@@ -35,13 +37,13 @@ public class PostService {
     // }
 
     public List<Post> getPosts() {
-        List<Post> postList = postRepository.findPost();
+        List<Post> postList = jpaRepository.findAllByOrderByUpdtDateDesc();
 
         return postList;
     }
 
     public List<Post> getPostsOrderByUpdtAsc() {
-        List<Post> postList = postRepository.findPostOrderByUpdtAsc();
+        List<Post> postList = jpaRepository.findAllByOrderByUpdtDateAsc();
 
         return postList;
     }
@@ -53,24 +55,53 @@ public class PostService {
     }
 
     public List<Post> searchPostByTitle(String query) {
-        List<Post> postList = postRepository.findPostLikeTitle(query);
+        List<Post> postList = jpaRepository.findByTitleContainingOrderByUpdtDateDesc(query);
 
         return postList;
     }
 
     public List<Post> searchPostByContent(String param) {
-        List<Post> postList = postRepository.findPostLikeContent(param);
+        List<Post> postList = jpaRepository.findByContentContainingOrderByUpdtDateDesc(param);
 
         return postList;
     }
 
     public boolean savePost(Post post) {
-        int result = postRepository.savePost(post);
+        // int result = postRepository.savePost(post);
+        Post result = jpaRepository.save(post);
         boolean isSuccess = true;
-        if(result == 0) {
+        if(result == null) {
             isSuccess = false;
         }
         return isSuccess;
+    }
+
+    public boolean deletePost(Long id) {
+        Post result = jpaRepository.findOneById(id);
+        if(result == null) {
+            return false;
+        }
+        jpaRepository.deleteById(id);
+        return true;
+    }
+
+    public boolean updatePost(Post post) {
+        Post result = jpaRepository.findOneById(post.getId());
+
+        if(result == null) {
+            return false;
+        }
+
+        if(!StringUtils.isEmpty(post.getTitle())) {
+            result.setTitle(post.getTitle());
+        }
+
+        if(!StringUtils.isEmpty(post.getContent())) {
+            result.setContent(post.getContent());
+        }
+
+        jpaRepository.save(result);
+        return true;
     }
 
 }
